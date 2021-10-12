@@ -1,5 +1,5 @@
 const Web3 = require('web3');
-var baseURL = 'http://localhost',
+var baseURL = 'http://vps-2218353-x.dattaweb.com',
     web3, metamaskAccounts = [], myAccount, isConnected, lastURL, actURL,
     shareReady = false, ourAddress = '0x61BFef7f4121077106B4B07F84B876b004d2475C';
 
