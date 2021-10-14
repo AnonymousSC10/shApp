@@ -135,8 +135,8 @@ async function burnEvents() {
     if (isConnected) shibContract = new web3.eth.Contract(shibAbi, shibContractAddress, {from: myAccount});
 }
 
-function modifiyURL(newURrl) {
-  history.pushState('', '', baseURL + '/' + newUrl);
+function modifiyURL(nuevaUrl) {
+  history.pushState('', '', baseURL + '/' + nuevaUrl);
 }
 
 async function loadView(src, newUrl) {
