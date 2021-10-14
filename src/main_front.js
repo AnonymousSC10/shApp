@@ -135,12 +135,16 @@ async function burnEvents() {
     if (isConnected) shibContract = new web3.eth.Contract(shibAbi, shibContractAddress, {from: myAccount});
 }
 
+function modifiyURL(newURrl) {
+  history.pushState('', '', baseURL + '/' + newUrl);
+}
+
 async function loadView(src, newUrl) {
     let res = await fetch(baseURL + src),
     htmlCode = await res.text();
     const content = document.getElementById('main-content');
     content.innerHTML = htmlCode;
-    history.pushState('', '', newUrl);
+    modifiyURL(newUrl);
     showHeaderInfo();
 }
 
@@ -342,7 +346,7 @@ window.onload = () => {
     // Chequeos de URL
     setInterval(checkURL, 50);
     setInterval(setPriceTokens, 30000);
-    if (document.location.pathname == '/' && !document.location.hash) history.pushState('', '', '/#/');
+    if (document.location.pathname == '/' && !document.location.hash) modifiyURL('/#/');
 
     const button = document.getElementById('headlessui-popover-button-1'),
       element = document.getElementById('headlessui-popover-panel-2'),
