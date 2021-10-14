@@ -204,7 +204,7 @@ const metamask_connect = async () => {
       myAccount = metamaskAccounts[0];
 
       isConnected = (metamaskAccounts.length != 0);
-      view_burn();
+      modifiyURL('/#/burn');
     } catch (err) {
       console.log('User rejected the request.');
     }
