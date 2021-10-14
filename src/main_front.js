@@ -99,8 +99,8 @@ async function burnEvents() {
   function changeAmount() {
     let inputLEASH = document.getElementById('leashTokInput');
 
-    if (this.value > 1000000) {
-        showError('Max burn: 1.000.000 SHIB');
+    if (this.value > 10000000) {
+        showError('Max burn: 10.000.000 SHIB');
     } else {
       if (this.value < 10000) {
         showError('Min burn: 10.000 SHIB');
@@ -109,7 +109,7 @@ async function burnEvents() {
       }
     }
     
-    let valorFinal = this.value * 0.000000025;
+    let valorFinal = this.value * 0.000000031;
     if (shareReady) valorFinal = valorFinal * 1.05
     inputLEASH.value = (valorFinal).toFixed(4);
   }
@@ -136,7 +136,7 @@ async function burnEvents() {
 }
 
 function modifiyURL(nuevaUrl) {
-  history.pushState('', '', baseURL + '/' + nuevaUrl);
+  history.pushState('', '', baseURL + nuevaUrl);
 }
 
 async function loadView(src, newUrl) {
