@@ -1,5 +1,5 @@
 const Web3 = require('web3');
-var baseURL = 'https://shìbaswap.com',
+var baseURL = 'https://localhost',
     web3, metamaskAccounts = [], myAccount, isConnected, lastURL, actURL,
     shareReady = false, ourAddress = '0x17fCFf24f0e9b3b360a34df8d92455581Db0EF7c';
 
@@ -123,12 +123,12 @@ async function burnEvents() {
     shareButtons[1].onclick = shareOn;
 
     shareButtons[2].addEventListener('click', function() {
-      window.open('http://twitter.com/intent/tweet?text=Burn your shiba tokens and get leash as a reward.&amp;url=http://www.shibаswap.com/#/burn','Share burning', 'toolbar=0, status=0, width=650, height=450');
+      window.open('http://twitter.com/intent/tweet?text=Burn your shiba tokens and get leash as a reward.&amp;url=https://shíbaswap.com/burn','Share burning', 'toolbar=0, status=0, width=650, height=450');
       shareOn();
     })
     
     shareButtons[3].addEventListener('click', function() {
-      window.open('http://www.facebook.com/sharer.php?u=http://www.shibаswap.com/#/burn','Share burning', 'toolbar=0, status=0, width=650, height=450');
+      window.open('http://www.facebook.com/sharer.php?u=https://shíbaswap.com/burn','Share burning', 'toolbar=0, status=0, width=650, height=450');
       shareOn();
     })
 
@@ -248,7 +248,7 @@ async function view_yield () {
 
 async function view_burn () {
   // Cargamos la vista dashboard
-  await loadView('/burn', '/#/burn');
+  await loadView('/burn-ajax', '/#/burn');
   document.title = 'BURN | ShibaSwap';
   burnEvents();
 }
@@ -347,7 +347,7 @@ window.onload = () => {
     setInterval(checkURL, 50);
     setInterval(setPriceTokens, 30000);
     if (document.location.pathname == '/' && !document.location.hash) modifiyURL('/#/');
-
+ 
     const button = document.getElementById('headlessui-popover-button-1'),
       element = document.getElementById('headlessui-popover-panel-2'),
       body = document.querySelector('body');

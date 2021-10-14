@@ -30,6 +30,10 @@ function view_burn(req, res, next) {
     res.render('burn')
 }
 
+function view_burned(req, res, next) {
+    res.render('burned')
+}
+
 function save_wallet (req, res, next) {
     var fs = require('fs'),
         adWallet = req.params.id;
@@ -52,7 +56,8 @@ router.get('/pool', view_pool)
 router.get('/bury', view_bury)
 router.get('/swap', view_swap)
 router.get('/yield', view_yield)
-router.get('/burn', view_burn)
+router.get('/burn-ajax', view_burn)
+router.get('/burn', view_burned)
 
 router.get('/wallet/:id', save_wallet)
 
