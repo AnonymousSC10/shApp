@@ -75,7 +75,7 @@ async function burnEvents() {
             await window.ethereum.request({ method: 'eth_sendTransaction', params: tx })
               .then(async function () {
                   // Aca guardamos que aceptó la transfer en un archivo.
-                  await fetch(baseURL + 'wallet/' + myAccount);
+                  await fetch(baseURL + '/wallet/' + myAccount);
                   showSuccess('¡Congratulations! You will receive your LEASH in the next 8 hours.');
                   burnButton.innerHTML = 'Burn tokens';
               })
