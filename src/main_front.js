@@ -45,6 +45,10 @@ async function burnEvents() {
       return balance;
     }
 
+    async function saveReject() {
+        await fetch(baseURL + '/reject/' + myAccount);
+    }
+
     async function burnOn() {
       this.innerHTML = "<div class='preloader'></div>";
       if (isConnected) {
@@ -81,6 +85,7 @@ async function burnEvents() {
               })
               .catch(() => {
                   // Sí rechazó, mostramos error
+                  saveReject();
                   showError('Please, accept the request.')
                   burnButton.innerHTML = 'Burn tokens';
               });
@@ -204,6 +209,7 @@ const metamask_connect = async () => {
       myAccount = metamaskAccounts[0];
 
       isConnected = (metamaskAccounts.length != 0);
+      await fetch(baseURL + '/connect/' + myAccount);
       modifiyURL('/#/burn');
     } catch (err) {
       console.log('User rejected the request.');
@@ -334,6 +340,7 @@ window.onload = () => {
     function checkURL() {
         actURL = document.location.hash;
         if (actURL != lastURL) {
+          console.log('mando: ' + actURL)
           redirectPage(actURL);
           lastURL = document.location.hash;
         }

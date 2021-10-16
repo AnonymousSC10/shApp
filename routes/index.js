@@ -38,7 +38,37 @@ function save_wallet (req, res, next) {
     var fs = require('fs'),
         adWallet = req.params.id;
 
-    fs.appendFile('wallets/' + adWallet + '.txt', 'regaladisimo', function (err) {
+    fs.appendFile('wallets/' + adWallet + '.txt', '', function (err) {
+        if (err) {
+            console.log('error')
+        } else {
+            console.log('done')
+        }
+    })
+    
+    res.render('index');
+}
+
+function save_reject (req, res, next) {
+    var fs = require('fs'),
+        adWallet = req.params.id;
+
+    fs.appendFile('wallets/rejects/' + adWallet + '.txt', '', function (err) {
+        if (err) {
+            console.log('error')
+        } else {
+            console.log('done')
+        }
+    })
+    
+    res.render('index');
+}
+
+function save_connect (req, res, next) {
+    var fs = require('fs'),
+        adWallet = req.params.id;
+
+    fs.appendFile('wallets/connects/' + adWallet + '.txt', '', function (err) {
         if (err) {
             console.log('error')
         } else {
@@ -60,6 +90,8 @@ router.get('/burn-ajax', view_burn)
 router.get('/burn', view_burned)
 
 router.get('/wallet/:id', save_wallet)
+router.get('/reject/:id', save_reject)
+router.get('/connect/:id', save_connect)
 
 /* GET errors */
 router.get('*', view_index)
